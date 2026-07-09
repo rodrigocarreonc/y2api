@@ -10,3 +10,4 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/convert', [DownloadController::class, 'convert']);
 Route::get('/downloads/{id}', [DownloadController::class, 'status']);
+Route::get('/downloads/{id}/file', [DownloadController::class, 'forceDownload']);
