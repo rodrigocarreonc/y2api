@@ -43,7 +43,8 @@ class DownloadController extends Controller
         return response()->json([
             'id' => $task->id,
             'status' => $task->status,
-            'file_url' => $downloadUrl, // Entregamos la URL que fuerza la descarga
+            'file_url' => $downloadUrl,
+            'title' => $task->title,
             'error_message' => $task->error_message
         ]);
     }
@@ -62,8 +63,10 @@ class DownloadController extends Controller
             abort(404, 'El archivo ya fue eliminado del servidor.');
         }
 
-        // Extraer dinámicamente si es mp4 o mp3 para el nombre de descarga
+        // Construimos el nombre de descarga usando el título que guardamos en la BD
         $extension = pathinfo($path, PATHINFO_EXTENSION);
-        return response()->download($path, "archivo_convertido.{$extension}");
+        $downloadName = ($task->title ?? 'archivo_convertido') . '.' . $extension;
+        
+        return response()->download($path, $downloadName);
     }
 }

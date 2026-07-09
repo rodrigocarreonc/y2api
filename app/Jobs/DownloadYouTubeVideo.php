@@ -31,34 +31,32 @@ class DownloadYouTubeVideo implements ShouldQueue
 
         $task->update(['status' => 'processing']);
 
-        // 1. Usar el formato de la BD para la extensión
-        $fileName = uniqid('media_') . '.' . $task->format; 
         $outputDirectory = storage_path('app/public/downloads');
-        
         if (!is_dir($outputDirectory)) {
             mkdir($outputDirectory, 0755, true);
         }
         
-        $absolutePath = $outputDirectory . '/' . $fileName;
+        // Usamos una plantilla con el ID de la tarea para evitar colisiones y %(title)s para el título.
+        // También sanitizamos el nombre usando la sintaxis de yt-dlp (reemplazando espacios y caracteres raros).
+        $pathTemplate = $outputDirectory . '/task_' . $this->taskId . '_%(title)s.%(ext)s';
 
-        // 2. Definir los comandos según el formato
         if ($task->format === 'mp3') {
-            // Comandos para extraer audio con FFmpeg
             $command = [
                 'yt-dlp',
-                '-x', // Extraer audio
-                '--audio-format', 'mp3', // Formato de destino
-                '--audio-quality', '0', // 0 = mejor calidad posible (VBR)
-                '-o', $absolutePath,
+                '-x', 
+                '--audio-format', 'mp3', 
+                '--audio-quality', '0', 
+                '--print', 'after_move:filepath', // Imprime la ruta final
+                '-o', $pathTemplate,
                 $this->videoUrl
             ];
         } else {
-            // Comandos originales para video
             $command = [
                 'yt-dlp',
                 '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                 '--merge-output-format', 'mp4',
-                '-o', $absolutePath,
+                '--print', 'after_move:filepath', // Imprime la ruta final
+                '-o', $pathTemplate,
                 $this->videoUrl
             ];
         }
@@ -67,13 +65,20 @@ class DownloadYouTubeVideo implements ShouldQueue
         $process->setTimeout(600); 
 
         try {
-            // Ejecutar el comando en la terminal
             $process->mustRun();
+            
+            // yt-dlp imprimirá la ruta completa en la salida estándar.
+            // Limpiamos la salida (trim) para quitar saltos de línea.
+            $finalPath = trim($process->getOutput());
+            
+            // Obtenemos solo el nombre del archivo de esa ruta
+            $fileName = basename($finalPath);
 
-            // Si llegamos aquí, la descarga terminó correctamente
             $task->update([
                 'status' => 'completed',
-                'file_url' => asset('storage/downloads/' . $fileName) 
+                'file_url' => asset('storage/downloads/' . $fileName),
+                // Extraemos un título "limpio" quitando el prefijo "task_ID_" y la extensión
+                'title' => pathinfo(preg_replace('/^task_\d+_/', '', $fileName), PATHINFO_FILENAME)
             ]);
 
         } catch (\Exception $exception) {

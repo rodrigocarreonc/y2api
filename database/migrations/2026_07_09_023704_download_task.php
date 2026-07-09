@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('url');
             $table->enum('format', ['mp3', 'mp4'])->default('mp3');
+            $table->string('title')->nullable();
             $table->enum('status', ['pending', 'processing', 'completed', 'failed'])->default('pending');
             $table->string('file_url')->nullable();
             $table->text('error_message')->nullable();
