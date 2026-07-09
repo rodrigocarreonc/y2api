@@ -12,11 +12,13 @@ class DownloadController extends Controller
     public function convert(Request $request)
     {
         $request->validate([
-            'url' => 'required|url'
+            'url' => 'required|url',
+            'format' => 'required|in:mp3,mp4'
         ]);
 
         $task = DownloadTask::create([
             'url' => $request->url,
+            'format' => $request->format,
             'status' => 'pending'
         ]);
 
@@ -53,7 +55,6 @@ class DownloadController extends Controller
             abort(404, 'El archivo no está listo.');
         }
 
-        // Extraemos solo "video_xxxxxx.mp4" de la URL guardada
         $fileName = basename($task->file_url);
         $path = storage_path('app/public/downloads/' . $fileName);
 
@@ -61,7 +62,8 @@ class DownloadController extends Controller
             abort(404, 'El archivo ya fue eliminado del servidor.');
         }
 
-        // El segundo parámetro es el nombre con el que se descargará el archivo
-        return response()->download($path, 'video_convertido.mp4');
+        // Extraer dinámicamente si es mp4 o mp3 para el nombre de descarga
+        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        return response()->download($path, "archivo_convertido.{$extension}");
     }
 }

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('download_tasks', function (Blueprint $table) {
             $table->id();
             $table->string('url');
+            $table->enum('format', ['mp3', 'mp4'])->default('mp3');
             $table->enum('status', ['pending', 'processing', 'completed', 'failed'])->default('pending');
             $table->string('file_url')->nullable();
             $table->text('error_message')->nullable();

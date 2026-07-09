@@ -8,6 +8,7 @@ class DownloadTask extends Model
 {
     protected $fillable = [
         'url', 
+        'format',
         'status', 
         'file_url', 
         'error_message'
