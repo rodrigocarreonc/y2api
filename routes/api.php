@@ -8,6 +8,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('/convert', [DownloadController::class, 'convert']);
+Route::middleware('throttle:conversions')->group(function () {
+    Route::post('/convert', [DownloadController::class, 'convert']);
+});
 Route::get('/downloads/{id}', [DownloadController::class, 'status']);
 Route::get('/downloads/{id}/file', [DownloadController::class, 'forceDownload']);
