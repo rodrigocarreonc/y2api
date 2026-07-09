@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class DownloadTask extends Model
 {
     protected $fillable = [
-        'url', 
+        'url',
         'format',
         'title',
-        'status', 
-        'file_url', 
-        'error_message'
+        'status',
+        'file_url',
+        'error_message',
     ];
 }
