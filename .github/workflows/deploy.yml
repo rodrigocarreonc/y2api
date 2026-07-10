@@ -94,15 +94,20 @@ jobs:
     if: github.ref == 'refs/heads/main'
       
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          name: php-app
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'y2mate' # REEMPLAZA ESTO
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: .
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/tu-api-videos
+            # Descargar los últimos cambios
+            git pull origin main
+            # Instalar nuevas dependencias si las hay
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+            # Limpiar y reconstruir caché de Laravel
+            php artisan config:cache
+            php artisan route:cache
+            # Reiniciar las colas para que yt-dlp y ffmpeg usen el nuevo código
+            sudo supervisorctl restart laravel-worker:*
