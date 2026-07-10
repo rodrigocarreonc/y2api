@@ -39,12 +39,16 @@ class DownloadYouTubeVideo implements ShouldQueue
         // También sanitizamos el nombre usando la sintaxis de yt-dlp (reemplazando espacios y caracteres raros).
         $pathTemplate = $outputDirectory.'/task_'.$this->taskId.'_%(title)s.%(ext)s';
 
+        // Declaramos la ruta dinámica de las cookies
+        $cookiePath = storage_path('youtube-cookies.txt');
+
         if ($task->format === 'mp3') {
             $command = [
                 'yt-dlp',
                 '-x',
                 '--audio-format', 'mp3',
                 '--audio-quality', '0',
+                '--cookies', $cookiePath,
                 '--print', 'after_move:filepath', // Imprime la ruta final
                 '-o', $pathTemplate,
                 $this->videoUrl,
@@ -54,6 +58,7 @@ class DownloadYouTubeVideo implements ShouldQueue
                 'yt-dlp',
                 '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                 '--merge-output-format', 'mp4',
+                '--cookies', $cookiePath,
                 '--print', 'after_move:filepath', // Imprime la ruta final
                 '-o', $pathTemplate,
                 $this->videoUrl,
