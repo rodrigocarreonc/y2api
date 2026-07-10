@@ -114,4 +114,4 @@ jobs:
             php artisan route:cache
             
             # Reiniciar las colas para que yt-dlp y ffmpeg usen el nuevo código
-            sudo supervisorctl restart laravel-worker:*
+            sudo supervisorctl restart y2api-worker:*
