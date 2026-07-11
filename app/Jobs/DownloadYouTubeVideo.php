@@ -50,7 +50,7 @@ class DownloadYouTubeVideo implements ShouldQueue
                 '--audio-quality', '0',
                 '--cookies', $cookiePath,
                 '--print', 'after_move:filepath', // Imprime la ruta final
-                '--js-runtimes', '/usr/bin/node', // <-- Fuerza el uso de Node en Linux
+                '--js-runtimes', 'node:/usr/bin/node', // <-- Fuerza el uso de Node en Linux
                 '-o', $pathTemplate,
                 $this->videoUrl,
             ];
@@ -61,7 +61,7 @@ class DownloadYouTubeVideo implements ShouldQueue
                 '--merge-output-format', 'mp4',
                 '--cookies', $cookiePath,
                 '--print', 'after_move:filepath', // Imprime la ruta final
-                '--js-runtimes', '/usr/bin/node', // <-- Fuerza el uso de Node en Linux
+                '--js-runtimes', 'node:/usr/bin/node', // <-- Fuerza el uso de Node en Linux
                 '-o', $pathTemplate,
                 $this->videoUrl,
             ];
